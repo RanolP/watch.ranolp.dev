@@ -24,8 +24,13 @@ function App() {
   const widthSignal = windowWidthSignal();
   const heightSignal = windowHeightSignal();
 
-  const width = () => Math.min(widthSignal(), (heightSignal() * 16) / 9);
-  const height = () => Math.min(heightSignal(), (widthSignal() * 9) / 16);
+  const width = () =>
+    Math.max(800, Math.min(widthSignal(), (heightSignal() * 16) / 9));
+  const height = () =>
+    Math.max(
+      (800 * 9) / 16,
+      Math.min(heightSignal(), (widthSignal() * 9) / 16),
+    );
 
   const marginTop = () => 5;
   const marginBottom = () => 20;
@@ -108,12 +113,13 @@ function App() {
               border-black
               border-rounded-md
               p-2
-              w-60
-              h-35
+              md="w-60 h-35"
+              w-50
+              h-30
               flex="~ col"
             >
-              <h3>
-                <span font-bold text-5>
+              <h3 p-1 md:p-2>
+                <span font-bold md:text-5 text-4>
                   {datapoint.rank}. {candidate.name}
                 </span>{' '}
                 <span
@@ -126,21 +132,23 @@ function App() {
                   items-center
                   px-1
                   text-3
-                  mx="-0.7"
-                  vertical-super
+                  md:mx="-0.7"
+                  vertical-mid
+                  md:vertical-super
                 >
                   {datapoint.votePercent}%
                 </span>
               </h3>
-              <div flex="~ row 1">
-                <p p-2 flex-1>
+              <div flex="~ row 1" text-4>
+                <p p-1 md:p-2 flex-1>
                   투표 {datapoint.votePoints} <br />
                   스밍 {datapoint.streamingPercent}% <br />
                 </p>
                 <img
                   rounded-md
-                  w-20
-                  h-20
+                  w-14
+                  h-14
+                  md="w-20 h-20"
                   aspect-ratio-square
                   object-cover
                   self-end
@@ -153,45 +161,48 @@ function App() {
           )}
         </For>
       </ol>
-      <svg
-        w-full
-        viewBox={`0 0 ${width() + marginLeft()} ${
-          height() + marginTop() + marginBottom()
-        }`}
-      >
-        <g class="[&_text]:text-[clamp(10px,1vw,24px)]">
-          {$xAxis}
-          {$yAxis}
-        </g>
-        <For each={lines()}>
-          {({ id, d }) => (
-            <path
-              stroke={`hsl(${hueMap[id]} 60% 80%)`}
-              stroke-width="clamp(2px, 0.4vw, 16px)"
-              fill="none"
-              d={d}
-            />
-          )}
-        </For>
-        <For
-          each={Object.entries(snapshot.favorite.candidateData).sort(
-            ([a, _a], [b, _b]) => a.localeCompare(b),
-          )}
+      <div max-w-full overflow-x-auto>
+        <svg
+          width={width()}
+          height={height()}
+          viewBox={`0 0 ${width() + marginLeft()} ${
+            height() + marginTop() + marginBottom()
+          }`}
         >
-          {([_, dots]) => (
-            <For each={dots}>
-              {({ timestamp, data }) => (
-                <circle
-                  cx={x()(new Date(timestamp.epochMilliseconds))}
-                  cy={y()(data.votePercent)}
-                  r="0.2vw"
-                  fill={`hsl(${hueMap[data.candidateId]} 60% 50%)`}
-                />
-              )}
-            </For>
-          )}
-        </For>
-      </svg>
+          <g class="[&_text]:text-[clamp(10px,1vw,24px)]">
+            {$xAxis}
+            {$yAxis}
+          </g>
+          <For each={lines()}>
+            {({ id, d }) => (
+              <path
+                stroke={`hsl(${hueMap[id]} 60% 80%)`}
+                stroke-width="clamp(2px, 0.4vw, 16px)"
+                fill="none"
+                d={d}
+              />
+            )}
+          </For>
+          <For
+            each={Object.entries(snapshot.favorite.candidateData).sort(
+              ([a, _a], [b, _b]) => a.localeCompare(b),
+            )}
+          >
+            {([_, dots]) => (
+              <For each={dots}>
+                {({ timestamp, data }) => (
+                  <circle
+                    cx={x()(new Date(timestamp.epochMilliseconds))}
+                    cy={y()(data.votePercent)}
+                    r="0.2vw"
+                    fill={`hsl(${hueMap[data.candidateId]} 60% 50%)`}
+                  />
+                )}
+              </For>
+            )}
+          </For>
+        </svg>
+      </div>
     </div>
   );
 }
