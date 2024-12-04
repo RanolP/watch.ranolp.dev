@@ -96,6 +96,13 @@ function App() {
       .call(d3.axisLeft(y()).tickValues([0, 4, 20, 50])),
   );
 
+  const candidatesRank = Object.values(snapshot.favorite.candidates)
+    .sort((a, b) => last[a.id].data.rank - last[b.id].data.rank)
+    .map((candidate) => ({
+      candidate,
+      datapoint: last[candidate.id].data,
+    }));
+
   return (
     <div break-keep my-4 px-4 max-w-350 mx-auto text-balance flex="~ col">
       <h1 text-center text-6 md:text-12 font-bold>
@@ -105,28 +112,27 @@ function App() {
         {snapshot.favorite.description}
       </p>
       <ol flex="~ row wrap" gap-3 m-3 w-full justify-center>
-        <For
-          each={Object.values(snapshot.favorite.candidates)
-            .sort((a, b) => last[a.id].data.rank - last[b.id].data.rank)
-            .map((candidate) => ({
-              candidate,
-              datapoint: last[candidate.id].data,
-            }))}
-        >
-          {({ candidate, datapoint }) => (
+        <For each={candidatesRank}>
+          {({ candidate, datapoint }, i) => (
             <li
               inline-block
               border-1
               border-black
               border-rounded-md
               p-2
-              md="w-60 h-35"
-              w-50
+              md="w-60 h-42"
+              w-44
               h-30
               flex="~ col"
             >
               <h3 p-1 md:p-2>
-                <span font-bold md:text-5 text-4>
+                <span
+                  font-bold
+                  md:text-5
+                  text-4
+                  class="tracking--0.5"
+                  md="tracking-normal"
+                >
                   {datapoint.rank}. {candidate.name}
                 </span>{' '}
                 <span
@@ -145,6 +151,20 @@ function App() {
                 >
                   {datapoint.votePercent}%
                 </span>
+                <small block h-2>
+                  {i() > 0 ? (
+                    <>
+                      순위 역전까지{' '}
+                      {(
+                        candidatesRank[i() - 1].datapoint.votePercent -
+                        datapoint.votePercent
+                      ).toFixed(2)}
+                      %!
+                    </>
+                  ) : (
+                    <>지켜야 한다...!</>
+                  )}
+                </small>
               </h3>
               <div flex="~ row 1" text-4>
                 <p p-1 md:p-2 flex-1>
