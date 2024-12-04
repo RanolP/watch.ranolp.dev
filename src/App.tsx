@@ -86,13 +86,13 @@ function App() {
 
   return (
     <div break-keep my-4 px-4 max-w-350 mx-auto text-balance flex="~ col">
-      <h1 text-center text-12 font-bold>
+      <h1 text-center text-6 md:text-12 font-bold>
         {snapshot.favorite.title}
       </h1>
-      <p text-5 text-center whitespace-pre-line max-w-250 mx-auto>
+      <p text-center text-4 md:text-5 whitespace-pre-line max-w-250 mx-auto>
         {snapshot.favorite.description}
       </p>
-      <ol flex="~ row wrap" gap-3 m-3>
+      <ol flex="~ row wrap" gap-3 m-3 w-full justify-center>
         <For
           each={Object.values(snapshot.favorite.candidates)
             .sort((a, b) => last[a.id].data.rank - last[b.id].data.rank)
@@ -113,23 +113,28 @@ function App() {
               flex="~ col"
             >
               <h3>
+                <span font-bold text-5>
+                  {datapoint.rank}. {candidate.name}
+                </span>{' '}
                 <span
-                  style={{ background: `hsl(${hueMap[candidate.id]} 60% 80%)` }}
+                  style={{
+                    background: `hsl(${hueMap[candidate.id]} 60% 80%)`,
+                  }}
                   border-rounded-full
-                  w-6
-                  h-6
                   inline-flex
                   justify-center
                   items-center
-                  p-2
+                  px-1
+                  text-3
+                  mx="-0.7"
+                  vertical-super
                 >
-                  {datapoint.rank}
-                </span>{' '}
-                {candidate.name}
+                  {datapoint.votePercent}%
+                </span>
               </h3>
               <div flex="~ row 1">
                 <p p-2 flex-1>
-                  투표 {datapoint.votePercent}% ({datapoint.votePoints}) <br />
+                  투표 {datapoint.votePoints} <br />
                   스밍 {datapoint.streamingPercent}% <br />
                 </p>
                 <img
