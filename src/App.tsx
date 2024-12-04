@@ -25,11 +25,18 @@ function App() {
   const heightSignal = windowHeightSignal();
 
   const width = () =>
-    Math.max(800, Math.min(widthSignal(), (heightSignal() * 16) / 9));
+    Math.max(
+      800,
+      Math.min(widthSignal(), 1400 - 32, (heightSignal() * 16) / 9),
+    );
   const height = () =>
     Math.max(
       (800 * 9) / 16,
-      Math.min(heightSignal(), (widthSignal() * 9) / 16),
+      Math.min(
+        heightSignal(),
+        ((1400 - 32) * 9) / 16,
+        (widthSignal() * 9) / 16,
+      ),
     );
 
   const marginTop = () => 5;
