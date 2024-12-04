@@ -155,11 +155,19 @@ function App() {
                   {i() > 0 ? (
                     <>
                       순위 역전까지{' '}
-                      {(
-                        candidatesRank[i() - 1].datapoint.votePercent -
-                        datapoint.votePercent
-                      ).toFixed(2)}
-                      %!
+                      <b
+                        font-bold
+                        style={{
+                          color: `hsl(${hueMap[candidate.id]} 70% 30%)`,
+                        }}
+                      >
+                        {(
+                          candidatesRank[i() - 1].datapoint.votePercent -
+                          datapoint.votePercent
+                        ).toFixed(2)}
+                        %
+                      </b>
+                      !
                     </>
                   ) : (
                     <>지켜야 한다...!</>
