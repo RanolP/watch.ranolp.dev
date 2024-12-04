@@ -46,10 +46,11 @@ function App() {
   const y = () =>
     d3
       .scaleLinear()
-      .domain([0, 5, 100])
+      .domain([0, 4, 20, 50])
       .range([
         height() - marginBottom(),
         marginTop() + (height() - marginBottom() - marginTop()) * 0.4,
+        marginTop() + (height() - marginBottom() - marginTop()) * 0.36,
         marginTop(),
       ]);
 
@@ -80,7 +81,7 @@ function App() {
     d3
       .select($yAxis)
       .attr('transform', `translate(${marginLeft()}, ${marginTop()})`)
-      .call(d3.axisLeft(y())),
+      .call(d3.axisLeft(y()).tickValues([0, 4, 20, 50])),
   );
 
   return (
