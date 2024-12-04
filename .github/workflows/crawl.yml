@@ -4,6 +4,9 @@ on:
     # 15min is the shortest interval!
     - cron: '*/15 * * * *'
 
+permissions:
+  contents: write
+
 jobs:
   crawl:
     runs-on: ubuntu-latest
