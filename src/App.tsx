@@ -44,7 +44,7 @@ function App() {
   const lines = () =>
     Object.entries(snapshot.favorite.candidateData)
       .sort(([a, _a], [b, _b]) => a.localeCompare(b))
-      .map(([id, data]) => {
+      .map(([_id, data]) => {
         const line = d3
           .line<(typeof data)[number]>()
           .x(({ timestamp }) => x()(new Date(timestamp.epochMilliseconds)))
@@ -77,7 +77,7 @@ function App() {
       }`}
     >
       <g class="[&_text]:text-[clamp(10px,1vw,24px)]">
-        {$xAxis()}
+        {$xAxis}
         {$yAxis}
       </g>
       <For each={lines()}>
