@@ -1,4 +1,8 @@
 on:
+  workflow_run:
+    workflows: ['Crawl']
+    types:
+      - completed
   push:
     branches: [main]
 
