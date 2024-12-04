@@ -12,6 +12,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: pnpm/action-setup@v4
         with:
           run_install: false
@@ -21,11 +23,5 @@ jobs:
           cache: pnpm
       - run: pnpm i
       - run: pnpm run crawl
-      - uses: devops-infra/action-commit-push@master
-        with:
-          github_token: '${{ secrets.GITHUB_TOKEN }}'
-          add_timestamp: false
-          commit_prefix: '[crawl]'
-          commit_message: 'Got new bugs data'
-          force: false
-          target_branch: main
+      - run: git commit -m "[crawl] got new data"
+      - run: git push
