@@ -68,58 +68,54 @@ function App() {
       .call(d3.axisLeft(y())),
   );
 
-  const svg = (
-    <svg
-      w-full
-      p-10
-      viewBox={`0 0 ${width() + marginLeft + marginRight} ${
-        height() + marginTop + marginBottom
-      }`}
-    >
-      <g class="[&_text]:text-[clamp(10px,1vw,24px)]">
-        {$xAxis}
-        {$yAxis}
-      </g>
-      <For each={lines()}>
-        {(d, i) => (
-          <path
-            stroke={`hsl(${(360 * i()) / count} 60% 80%)`}
-            stroke-width="clamp(2px, 0.4vw, 16px)"
-            fill="none"
-            d={d}
-          />
-        )}
-      </For>
-      <For
-        each={Object.entries(snapshot.favorite.candidateData).sort(
-          ([a, _a], [b, _b]) => a.localeCompare(b),
-        )}
-      >
-        {([_, dots], i) => (
-          <For each={dots}>
-            {({ timestamp, data }) => (
-              <circle
-                cx={x()(new Date(timestamp.epochMilliseconds))}
-                cy={y()(data.votePercent)}
-                r="0.2vw"
-                fill={`hsl(${(360 * i()) / count} 60% 50%)`}
-              />
-            )}
-          </For>
-        )}
-      </For>
-    </svg>
-  );
-
-  createEffect(() => {
-    console.log(svg);
-  });
-
   return (
-    <div>
-      <h1>{snapshot.favorite.title}</h1>
-      <p>{snapshot.favorite.description}</p>
-      {svg}
+    <div break-keep px-4 max-w-350 mx-auto text-balance flex="~ col">
+      <h1 text-center text-12 font-bold>
+        {snapshot.favorite.title}
+      </h1>
+      <p text-6 text-center whitespace-pre-line max-w-250 mx-auto>
+        {snapshot.favorite.description}
+      </p>
+      <svg
+        w-full
+        p-10
+        viewBox={`0 0 ${width() + marginLeft + marginRight} ${
+          height() + marginTop + marginBottom
+        }`}
+      >
+        <g class="[&_text]:text-[clamp(10px,1vw,24px)]">
+          {$xAxis}
+          {$yAxis}
+        </g>
+        <For each={lines()}>
+          {(d, i) => (
+            <path
+              stroke={`hsl(${(360 * i()) / count} 60% 80%)`}
+              stroke-width="clamp(2px, 0.4vw, 16px)"
+              fill="none"
+              d={d}
+            />
+          )}
+        </For>
+        <For
+          each={Object.entries(snapshot.favorite.candidateData).sort(
+            ([a, _a], [b, _b]) => a.localeCompare(b),
+          )}
+        >
+          {([_, dots], i) => (
+            <For each={dots}>
+              {({ timestamp, data }) => (
+                <circle
+                  cx={x()(new Date(timestamp.epochMilliseconds))}
+                  cy={y()(data.votePercent)}
+                  r="0.2vw"
+                  fill={`hsl(${(360 * i()) / count} 60% 50%)`}
+                />
+              )}
+            </For>
+          )}
+        </For>
+      </svg>
     </div>
   );
 }
