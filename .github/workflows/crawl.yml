@@ -1,4 +1,5 @@
 on:
+  workflow_dispatch:
   schedule:
     # 15min is the shortest interval!
     - cron: '*/15 * * * *'
@@ -8,11 +9,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          run_install: false
       - uses: actions/setup-node@v4
         with:
           node-version: 22.x
           cache: pnpm
-      - uses: pnpm/action-setup@v4
+      - run: pnpm i
       - run: pnpm run crawl
       - uses: devops-infra/action-commit-push@master
         with:
