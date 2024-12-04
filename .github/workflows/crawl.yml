@@ -24,7 +24,7 @@ jobs:
       - uses: devops-infra/action-commit-push@master
         with:
           github_token: '${{ secrets.GITHUB_TOKEN }}'
-          add_timestamp: true
+          add_timestamp: false
           commit_prefix: '[crawl]'
           commit_message: 'Got new bugs data'
           force: false
