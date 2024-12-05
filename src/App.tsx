@@ -3,7 +3,7 @@ import rawSnapshot from '../data/snapshot.json';
 import { TMergedData } from '../lib/transport/merged-data';
 import { createEffect, createSignal, For, Show } from 'solid-js';
 import { windowHeightSignal, windowWidthSignal } from './signalswindow-size';
-import { TCandidate, TCandidateData, TDatapoint } from '../lib/transport';
+import { TCandidate, TCandidateData } from '../lib/transport';
 import { useFloating } from 'solid-floating-ui';
 import { autoPlacement, offset, shift, VirtualElement } from '@floating-ui/dom';
 import { Temporal } from 'temporal-polyfill';
