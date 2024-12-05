@@ -112,6 +112,7 @@ function App() {
     points: Array<{ data: TCandidateData; percentage: number }>;
     deltaVotePoints?: number;
     deltaStreamingPercent?: number;
+    duration?: Temporal.Duration;
     virtualEl: VirtualElement;
   } | null>(null);
   const [floating, setFloating] = createSignal<HTMLDivElement | null>(null);
@@ -338,6 +339,10 @@ function App() {
                             ? data.streamingPercent -
                               dots[i() - 1].data.streamingPercent
                             : undefined,
+                        duration:
+                          i() > 0
+                            ? dots[i() - 1].timestamp.until(timestamp)
+                            : undefined,
                         virtualEl,
                       });
                     }}
@@ -374,8 +379,10 @@ function App() {
                     color: `hsl(${hueMap[target.candidate.id]} 60% 40%)`,
                   }}
                 >
-                  {target.candidate.name}
+                  {target.candidate.name}{' '}
                 </b>{' '}
+                {target.duration &&
+                  `(${target.duration.total('minutes').toFixed(1)}분 간)`}
                 <br />
                 {target.points.length === 1 ? (
                   <p>
