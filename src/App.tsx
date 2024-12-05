@@ -1,8 +1,12 @@
 import * as d3 from 'd3';
 import rawSnapshot from '../data/snapshot.json';
 import { TMergedData } from '../lib/transport/merged-data';
-import { createEffect, For } from 'solid-js';
+import { createEffect, createSignal, For, Show } from 'solid-js';
 import { windowHeightSignal, windowWidthSignal } from './signalswindow-size';
+import { TCandidate, TCandidateData, TDatapoint } from '../lib/transport';
+import { useFloating } from 'solid-floating-ui';
+import { autoPlacement, offset, shift, VirtualElement } from '@floating-ui/dom';
+import { Temporal } from 'temporal-polyfill';
 
 const snapshot = TMergedData.parse(rawSnapshot);
 
@@ -102,6 +106,23 @@ function App() {
       candidate,
       datapoint: last[candidate.id].data,
     }));
+
+  const [lastHoverTarget, setLastHoverTarget] = createSignal<{
+    candidate: TCandidate;
+    points: Array<{ data: TCandidateData; percentage: number }>;
+    deltaVotePoints?: number;
+    deltaStreamingPercent?: number;
+    virtualEl: VirtualElement;
+  } | null>(null);
+  const [floating, setFloating] = createSignal<HTMLDivElement | null>(null);
+  const position = useFloating(
+    () => lastHoverTarget()?.virtualEl,
+    () => floating(),
+    {
+      placement: 'top',
+      middleware: [autoPlacement(), shift(), offset(10)],
+    },
+  );
 
   return (
     <div break-keep my-4 px-4 max-w-350 mx-auto text-balance flex="~ col">
@@ -215,6 +236,64 @@ function App() {
                 stroke-width="clamp(2px, 0.4vw, 16px)"
                 fill="none"
                 d={d}
+                onMouseMove={(e) => {
+                  const cursor = Temporal.Instant.from(
+                    x().invert(e.offsetX).toISOString(),
+                  );
+                  const index = snapshot.favorite.candidateData[id].findIndex(
+                    ({ timestamp }) => cursor.until(timestamp).sign > 0,
+                  );
+                  const { [index - 1]: current, [index]: next } =
+                    snapshot.favorite.candidateData[id];
+
+                  const virtualEl: VirtualElement = {
+                    getBoundingClientRect() {
+                      return {
+                        x: e.clientX,
+                        left: e.clientX - 20,
+                        right: e.clientX + 20,
+                        width: 40,
+
+                        y: e.clientY,
+                        top: e.clientY - 20,
+                        bottom: e.clientY + 20,
+                        height: 40,
+                      };
+                    },
+                  };
+                  if (current && next) {
+                    const total = current.timestamp.until(next.timestamp);
+                    const points = [
+                      {
+                        data: current.data,
+                        percentage:
+                          1 -
+                          current.timestamp.until(cursor).seconds /
+                            total.seconds,
+                      },
+                      {
+                        data: next.data,
+                        percentage:
+                          1 -
+                          cursor.until(next.timestamp).seconds / total.seconds,
+                      },
+                    ];
+                    console.log(points);
+                    setLastHoverTarget({
+                      candidate: snapshot.favorite.candidates[id],
+                      points,
+                      virtualEl,
+                    });
+                  } else if (current || next) {
+                    let e = current ?? next;
+                    setLastHoverTarget({
+                      candidate: snapshot.favorite.candidates[id],
+                      points: [{ data: e.data, percentage: 1 }],
+                      virtualEl,
+                    });
+                  }
+                }}
+                onMouseLeave={() => setLastHoverTarget(null)}
               />
             )}
           </For>
@@ -223,20 +302,121 @@ function App() {
               ([a, _a], [b, _b]) => a.localeCompare(b),
             )}
           >
-            {([_, dots]) => (
+            {([id, dots]) => (
               <For each={dots}>
-                {({ timestamp, data }) => (
+                {({ timestamp, data }, i) => (
                   <circle
                     cx={x()(new Date(timestamp.epochMilliseconds))}
                     cy={y()(data.votePercent)}
                     r="0.2vw"
                     fill={`hsl(${hueMap[data.candidateId]} 60% 50%)`}
+                    onMouseMove={(e) => {
+                      const virtualEl: VirtualElement = {
+                        getBoundingClientRect() {
+                          return {
+                            x: e.clientX,
+                            left: e.clientX - 20,
+                            right: e.clientX + 20,
+                            width: 40,
+
+                            y: e.clientY,
+                            top: e.clientY - 20,
+                            bottom: e.clientY + 20,
+                            height: 40,
+                          };
+                        },
+                      };
+                      setLastHoverTarget({
+                        candidate: snapshot.favorite.candidates[id],
+                        points: [{ data, percentage: 1 }],
+                        deltaVotePoints:
+                          i() > 0
+                            ? data.votePoints - dots[i() - 1].data.votePoints
+                            : undefined,
+                        deltaStreamingPercent:
+                          i() > 0
+                            ? data.streamingPercent -
+                              dots[i() - 1].data.streamingPercent
+                            : undefined,
+                        virtualEl,
+                      });
+                    }}
+                    onMouseLeave={() => setLastHoverTarget(null)}
                   />
                 )}
               </For>
             )}
           </For>
         </svg>
+        <Show when={lastHoverTarget() !== null}>
+          {(() => {
+            const target = lastHoverTarget();
+            if (!target) return null;
+
+            return (
+              <div
+                ref={setFloating}
+                p-2
+                z-100
+                bg-white
+                rounded-md
+                shadow-md
+                shadow-gray
+                style={{
+                  position: position.strategy,
+                  top: `${position.y ?? 0}px`,
+                  left: `${position.x ?? 0}px`,
+                }}
+              >
+                <b
+                  font-bold
+                  style={{
+                    color: `hsl(${hueMap[target.candidate.id]} 60% 40%)`,
+                  }}
+                >
+                  {target.candidate.name}
+                </b>{' '}
+                <br />
+                {target.points.length === 1 ? (
+                  <p>
+                    {target.points[0].data.votePoints.toFixed(1)}표{' '}
+                    {target.deltaVotePoints
+                      ? `(${target.deltaVotePoints}표 상승)`
+                      : null}{' '}
+                    <br />
+                    {target.points[0].data.streamingPercent.toFixed(1)}% 스밍{' '}
+                    {target.deltaStreamingPercent
+                      ? target.deltaStreamingPercent > 0
+                        ? `(${target.deltaStreamingPercent.toFixed(1)}% 상승)`
+                        : `(${-target.deltaStreamingPercent.toFixed(1)}% 하락)`
+                      : null}{' '}
+                  </p>
+                ) : (
+                  <p>
+                    평균{' '}
+                    {target.points
+                      .reduce(
+                        (acc, curr) =>
+                          acc + curr.data.votePoints * curr.percentage,
+                        0,
+                      )
+                      .toFixed(1)}
+                    표 <br />
+                    평균{' '}
+                    {target.points
+                      .reduce(
+                        (acc, curr) =>
+                          acc + curr.data.streamingPercent * curr.percentage,
+                        0,
+                      )
+                      .toFixed(1)}
+                    % 스밍
+                  </p>
+                )}
+              </div>
+            );
+          })()}
+        </Show>
       </div>
     </div>
   );
