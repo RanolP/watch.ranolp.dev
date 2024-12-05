@@ -379,7 +379,7 @@ function App() {
                 <br />
                 {target.points.length === 1 ? (
                   <p>
-                    {target.points[0].data.votePoints.toFixed(1)}표{' '}
+                    {target.points[0].data.votePoints}표{' '}
                     {target.deltaVotePoints
                       ? `(${target.deltaVotePoints}표 상승)`
                       : null}{' '}
