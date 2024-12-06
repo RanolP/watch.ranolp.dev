@@ -40,7 +40,7 @@ function App() {
       Math.min(widthSignal(), 1400 - 32, (heightSignal() * 16) / 9),
     );
   // TODO: 줌 나중에?
-  const viewWidth = () =>
+  const _viewWidth = () =>
     Math.max(
       800,
       Math.min(widthSignal(), 1400 - 32, (heightSignal() * 16) / 9),
