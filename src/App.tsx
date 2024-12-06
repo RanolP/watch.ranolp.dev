@@ -28,7 +28,19 @@ function App() {
   const widthSignal = windowWidthSignal();
   const heightSignal = windowHeightSignal();
 
+  const minWidth =
+    1200 *
+    snapshot.recordedTimeRange.begin
+      .until(snapshot.recordedTimeRange.end)
+      .total('days');
+
   const width = () =>
+    Math.max(
+      minWidth,
+      Math.min(widthSignal(), 1400 - 32, (heightSignal() * 16) / 9),
+    );
+  // TODO: 줌 나중에?
+  const viewWidth = () =>
     Math.max(
       800,
       Math.min(widthSignal(), 1400 - 32, (heightSignal() * 16) / 9),
@@ -112,6 +124,7 @@ function App() {
     points: Array<{ data: TCandidateData; percentage: number }>;
     deltaVotePoints?: number;
     deltaStreamingPercent?: number;
+    timestamp: Temporal.Instant;
     duration?: Temporal.Duration;
     virtualEl: VirtualElement;
   } | null>(null);
@@ -218,7 +231,15 @@ function App() {
           )}
         </For>
       </ol>
-      <div max-w-full overflow-x-auto>
+      <div
+        max-w-full
+        overflow-x-auto
+        ref={(e) => {
+          requestAnimationFrame(() => {
+            e.scrollBy({ left: e.scrollWidth });
+          });
+        }}
+      >
         <svg
           width={width()}
           height={height()}
@@ -239,7 +260,7 @@ function App() {
                 d={d}
                 onMouseMove={(e) => {
                   const cursor = Temporal.Instant.from(
-                    x().invert(e.offsetX).toISOString(),
+                    x().invert(d3.pointer(e)[0]).toISOString(),
                   );
                   const index = snapshot.favorite.candidateData[id].findIndex(
                     ({ timestamp }) => cursor.until(timestamp).sign > 0,
@@ -279,11 +300,11 @@ function App() {
                           cursor.until(next.timestamp).seconds / total.seconds,
                       },
                     ];
-                    console.log(points);
                     setLastHoverTarget({
                       candidate: snapshot.favorite.candidates[id],
                       points,
                       virtualEl,
+                      timestamp: cursor,
                     });
                   } else if (current || next) {
                     let e = current ?? next;
@@ -291,6 +312,7 @@ function App() {
                       candidate: snapshot.favorite.candidates[id],
                       points: [{ data: e.data, percentage: 1 }],
                       virtualEl,
+                      timestamp: cursor,
                     });
                   }
                 }}
@@ -343,6 +365,7 @@ function App() {
                           i() > 0
                             ? dots[i() - 1].timestamp.until(timestamp)
                             : undefined,
+                        timestamp,
                         virtualEl,
                       });
                     }}
@@ -381,8 +404,20 @@ function App() {
                 >
                   {target.candidate.name}{' '}
                 </b>{' '}
+                (
+                {(() => {
+                  const datetime =
+                    target.timestamp.toZonedDateTimeISO('Asia/Seoul');
+
+                  return `${datetime.month}/${datetime.day} ${datetime.hour
+                    .toString()
+                    .padStart(2, '0')}:${datetime.minute
+                    .toString()
+                    .padStart(2, '0')}`;
+                })()}
                 {target.duration &&
-                  `(${target.duration.total('minutes').toFixed(1)}분 간)`}
+                  `, ${target.duration.total('minutes').toFixed(1)}분 간`}
+                )
                 <br />
                 {target.points.length === 1 ? (
                   <p>
