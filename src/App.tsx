@@ -7,6 +7,7 @@ import { TCandidate, TCandidateData } from '../lib/transport';
 import { useFloating } from 'solid-floating-ui';
 import { autoPlacement, offset, shift, VirtualElement } from '@floating-ui/dom';
 import { Temporal } from 'temporal-polyfill';
+import { josa } from 'es-hangul';
 
 const snapshot = TMergedData.parse(rawSnapshot);
 
@@ -138,6 +139,20 @@ function App() {
     },
   );
 
+  const accVotePoints = Object.values(last).reduce(
+    (acc, curr) => acc + curr.data.votePoints,
+    0,
+  );
+
+  const [percentPoint, setPercentPoint] = createSignal<number>(1);
+  const [selection, setSelection] = createSignal<number>(0);
+  const plan1PercentPoint = () =>
+    Math.ceil(
+      (percentPoint() * (accVotePoints * accVotePoints)) /
+        ((80 - percentPoint()) * accVotePoints -
+          80 * candidatesRank[selection()].datapoint.votePoints),
+    );
+
   return (
     <div break-keep my-4 px-4 max-w-350 mx-auto text-balance flex="~ col">
       <h1 text-center text-6 md:text-12 font-bold>
@@ -145,6 +160,46 @@ function App() {
       </h1>
       <p text-center text-4 md:text-5 whitespace-pre-line max-w-250 mx-auto>
         {snapshot.favorite.description}
+      </p>
+      <hr my-5 />
+      <p text-center text-4 md:text-5>
+        누적 표 수 : {new Intl.NumberFormat('ko-KR').format(accVotePoints)}
+        <br />
+        <select
+          name="1%p-select"
+          onChange={(e) => setSelection(Number(e.target.value))}
+        >
+          {candidatesRank.map(({ candidate }, idx) => (
+            <option value={idx}>{candidate.name}</option>
+          ))}
+        </select>
+        {josa.pick(
+          candidatesRank[selection()].candidate.name.replace(/[^가-힣]+/, ''),
+          '이/가',
+        )}{' '}
+        <input
+          w-15
+          type="number"
+          step={0.1}
+          value={percentPoint()}
+          onChange={(e) => setPercentPoint(e.target.valueAsNumber)}
+        />
+        %p를 올리기 위해선 약{' '}
+        {new Intl.NumberFormat('ko-KR').format(plan1PercentPoint())} 표 필요
+        <br />
+        표당{' '}
+        {new Intl.NumberFormat('ko-KR', {
+          style: 'currency',
+          currency: 'KRW',
+          maximumFractionDigits: 1,
+        }).format((135000 / 13000) * 20)}
+        <sup>골드하트 13,000개/₩135,000</sup>~
+        {new Intl.NumberFormat('ko-KR', {
+          style: 'currency',
+          currency: 'KRW',
+          maximumFractionDigits: 1,
+        }).format((1350 / 100) * 20)}
+        <sup>골드하트 100개/₩1,350</sup>
       </p>
       <ol flex="~ row wrap" gap-3 m-3 w-full justify-center>
         <For each={candidatesRank}>
@@ -200,7 +255,7 @@ function App() {
                           candidatesRank[i() - 1].datapoint.votePercent -
                           datapoint.votePercent
                         ).toFixed(2)}
-                        %
+                        %p
                       </b>
                       !
                     </>
@@ -429,8 +484,8 @@ function App() {
                     {target.points[0].data.streamingPercent.toFixed(1)}% 스밍{' '}
                     {target.deltaStreamingPercent
                       ? target.deltaStreamingPercent > 0
-                        ? `(${target.deltaStreamingPercent.toFixed(1)}% 상승)`
-                        : `(${-target.deltaStreamingPercent.toFixed(1)}% 하락)`
+                        ? `(${target.deltaStreamingPercent.toFixed(1)}%p 상승)`
+                        : `(${-target.deltaStreamingPercent.toFixed(1)}%p 하락)`
                       : null}{' '}
                   </p>
                 ) : (

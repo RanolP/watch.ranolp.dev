@@ -17,6 +17,9 @@ importers:
       d3:
         specifier: ^7.9.0
         version: 7.9.0
+      es-hangul:
+        specifier: ^2.2.4
+        version: 2.2.4
       es-toolkit:
         specifier: ^1.29.0
         version: 1.29.0
@@ -1026,6 +1029,9 @@ packages:
   entities@4.5.0:
     resolution: {integrity: sha512-V0hjH4dGPh9Ao5p0MoRY6BVqtwCjhz6vI5LT8AJ55H+4g9/4vbHx1I54fS0XuclLhDHArPQCiMjDxjaL8fPxhw==}
     engines: {node: '>=0.12'}
+
+  es-hangul@2.2.4:
+    resolution: {integrity: sha512-P0zZh+dADhefLo/KEYzTs2d29H+w99c9X6aUeVIoMxTBE1Z8H4/a4e4ZN3u8rmRD+3uOEhNfWXH/NX5dF4aixw==}
 
   es-toolkit@1.29.0:
     resolution: {integrity: sha512-GjTll+E6APcfAQA09D89HdT8Qn2Yb+TeDSDBTMcxAo+V+w1amAtCI15LJu4YPH/UCPoSo/F47Gr1LIM0TE0lZA==}
@@ -2392,6 +2398,8 @@ snapshots:
   electron-to-chromium@1.5.68: {}
 
   entities@4.5.0: {}
+
+  es-hangul@2.2.4: {}
 
   es-toolkit@1.29.0: {}
 
