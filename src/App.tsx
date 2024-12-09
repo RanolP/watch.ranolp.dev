@@ -8,6 +8,8 @@ import { useFloating } from 'solid-floating-ui';
 import { autoPlacement, offset, shift, VirtualElement } from '@floating-ui/dom';
 import { Temporal } from 'temporal-polyfill';
 import { josa } from 'es-hangul';
+import katex from 'katex';
+import 'katex/dist/katex.min.css';
 
 const snapshot = TMergedData.parse(rawSnapshot);
 
@@ -146,12 +148,57 @@ function App() {
 
   const [percentPoint, setPercentPoint] = createSignal<number>(1);
   const [selection, setSelection] = createSignal<number>(0);
-  const plan1PercentPoint = () =>
+  const planPercentPoint = () =>
     Math.ceil(
       (percentPoint() * (accVotePoints * accVotePoints)) /
         ((80 - percentPoint()) * accVotePoints -
           80 * candidatesRank[selection()].datapoint.votePoints),
     );
+  const check$ = (<div mt-5 w-fit mx-auto />) as HTMLDivElement;
+  createEffect(() => {
+    const { candidate, datapoint } = candidatesRank[selection()];
+    const tex = String.raw`
+    \begin{align}
+      ${(
+        (80 * datapoint.votePoints) / accVotePoints +
+        datapoint.streamingPercent
+      ).toFixed(1)} \% &= 80\% \times \frac{투표수_{${
+      candidate.name
+    }}}{투표수_{전체}} + {스트리밍_{${candidate.name}}} \% \nonumber \\
+    &= 80\% \times \frac{${datapoint.votePoints}}{${accVotePoints}} + ${
+      datapoint.streamingPercent
+    }\% 
+    \nonumber \\
+    
+    ${(
+      (80 * datapoint.votePoints) / accVotePoints +
+      datapoint.streamingPercent
+    ).toFixed(1)} \% + ${percentPoint()}\% &= 80\% \times \frac{투표수_{${
+      candidate.name
+    }} + 투표수_{신규}}{투표수_{전체} + 투표수_{신규}} + {스트리밍_{${
+      candidate.name
+    }}} \%
+    \nonumber \\ &= 80\% \times \frac{${
+      datapoint.votePoints
+    } + ${planPercentPoint()}}{${accVotePoints} + ${planPercentPoint()}} + ${
+      datapoint.streamingPercent
+    }\%
+    \nonumber \\ &= 80\% \times \frac{${
+      datapoint.votePoints + planPercentPoint()
+    }}{${accVotePoints + planPercentPoint()}} + ${datapoint.streamingPercent}\%
+    \nonumber \\ &= ${(
+      (80 * (datapoint.votePoints + planPercentPoint())) /
+        (accVotePoints + planPercentPoint()) +
+      datapoint.streamingPercent
+    ).toFixed(1)}\% =  ${(
+      (80 * datapoint.votePoints) / accVotePoints +
+      datapoint.streamingPercent
+    ).toFixed(1)} \% + ${percentPoint()}\%
+    \nonumber 
+    \end{align}
+    `;
+    katex.render(tex, check$, { displayMode: true });
+  });
 
   return (
     <div break-keep my-4 px-4 max-w-350 mx-auto text-balance flex="~ col">
@@ -185,7 +232,9 @@ function App() {
           onChange={(e) => setPercentPoint(e.target.valueAsNumber)}
         />
         %p를 올리기 위해선 약{' '}
-        {new Intl.NumberFormat('ko-KR').format(plan1PercentPoint())} 표 필요
+        {new Intl.NumberFormat('ko-KR').format(planPercentPoint())} 표 필요
+        <br />
+        {check$}
         <br />
         표당{' '}
         {new Intl.NumberFormat('ko-KR', {
