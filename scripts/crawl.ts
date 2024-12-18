@@ -8,13 +8,16 @@ import ky from 'ky';
 import path from 'node:path';
 
 const Favorites = {
-  COMEBACK_AND_TREND_2024: {
+  COMEBACK_AND_TREND_241204: {
     id: 2221,
+  },
+  HAPPY_NEW_YEAR_2024: {
+    id: 2263,
   },
 };
 
 const favorite = await getFavorite({
-  id: Favorites.COMEBACK_AND_TREND_2024.id,
+  id: Favorites.HAPPY_NEW_YEAR_2024.id,
 });
 const comments = await listComments({
   id: favorite.result.comment_group_id,

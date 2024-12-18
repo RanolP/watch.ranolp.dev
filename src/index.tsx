@@ -8,4 +8,4 @@ import App from './App.tsx';
 
 const root = document.getElementById('root');
 
-render(() => <App />, root!);
+render(() => <App showStreaming={false} />, root!);

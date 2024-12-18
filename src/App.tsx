@@ -27,7 +27,10 @@ const last = Object.fromEntries(
   ]),
 );
 
-function App() {
+interface Props {
+  showStreaming: boolean;
+}
+function App(props: Props) {
   const widthSignal = windowWidthSignal();
   const heightSignal = windowHeightSignal();
 
@@ -164,10 +167,13 @@ function App() {
         datapoint.streamingPercent
       ).toFixed(1)} \% &= 80\% \times \frac{투표수_{${
       candidate.name
-    }}}{투표수_{전체}} + {스트리밍_{${candidate.name}}} \% \nonumber \\
-    &= 80\% \times \frac{${datapoint.votePoints}}{${accVotePoints}} + ${
-      datapoint.streamingPercent
-    }\% 
+    }}}{투표수_{전체}}${
+      props.showStreaming ? String.raw` + {스트리밍_{${candidate.name}}}\%` : ''
+    }
+    \nonumber \\ &=
+    80\% \times \frac{${datapoint.votePoints}}{${accVotePoints}}${
+      props.showStreaming ? String.raw` + ${datapoint.streamingPercent}\%` : ''
+    } 
     \nonumber \\
     
     ${(
@@ -175,17 +181,19 @@ function App() {
       datapoint.streamingPercent
     ).toFixed(1)} \% + ${percentPoint()}\% &= 80\% \times \frac{투표수_{${
       candidate.name
-    }} + 투표수_{신규}}{투표수_{전체} + 투표수_{신규}} + {스트리밍_{${
-      candidate.name
-    }}} \%
+    }} + 투표수_{신규}}{투표수_{전체} + 투표수_{신규}}${
+      props.showStreaming ? String.raw`+ {스트리밍_{${candidate.name}}} \%` : ''
+    }
     \nonumber \\ &= 80\% \times \frac{${
       datapoint.votePoints
-    } + ${planPercentPoint()}}{${accVotePoints} + ${planPercentPoint()}} + ${
-      datapoint.streamingPercent
-    }\%
+    } + ${planPercentPoint()}}{${accVotePoints} + ${planPercentPoint()}}${
+      props.showStreaming ? String.raw` + ${datapoint.streamingPercent}\%` : ''
+    }
     \nonumber \\ &= 80\% \times \frac{${
       datapoint.votePoints + planPercentPoint()
-    }}{${accVotePoints + planPercentPoint()}} + ${datapoint.streamingPercent}\%
+    }}{${accVotePoints + planPercentPoint()}}${
+      props.showStreaming ? String.raw` + ${datapoint.streamingPercent}\%` : ''
+    }
     \nonumber \\ &= ${(
       (80 * (datapoint.votePoints + planPercentPoint())) /
         (accVotePoints + planPercentPoint()) +
@@ -264,11 +272,12 @@ function App() {
               h-30
               flex="~ col"
             >
-              <h3 p-1 md:p-2>
+              <h3 p-1 md:p-2 overflow-x-clip text-ellipsis>
                 <span
                   font-bold
                   md:text-5
                   text-4
+                  whitespace-pre
                   class="tracking--0.5"
                   md="tracking-normal"
                 >
@@ -316,7 +325,11 @@ function App() {
               <div flex="~ row 1" text-4>
                 <p p-1 md:p-2 flex-1>
                   투표 {datapoint.votePoints} <br />
-                  스밍 {datapoint.streamingPercent}% <br />
+                  {props.showStreaming && (
+                    <>
+                      스밍 {datapoint.streamingPercent}% <br />
+                    </>
+                  )}
                 </p>
                 <img
                   rounded-md
@@ -400,8 +413,8 @@ function App() {
                       {
                         data: next.data,
                         percentage:
-                          1 -
-                          cursor.until(next.timestamp).seconds / total.seconds,
+                          current.timestamp.until(cursor).seconds /
+                          total.seconds,
                       },
                     ];
                     setLastHoverTarget({
@@ -530,12 +543,21 @@ function App() {
                       ? `(${target.deltaVotePoints}표 상승)`
                       : null}{' '}
                     <br />
-                    {target.points[0].data.streamingPercent.toFixed(1)}% 스밍{' '}
-                    {target.deltaStreamingPercent
-                      ? target.deltaStreamingPercent > 0
-                        ? `(${target.deltaStreamingPercent.toFixed(1)}%p 상승)`
-                        : `(${-target.deltaStreamingPercent.toFixed(1)}%p 하락)`
-                      : null}{' '}
+                    {props.showStreaming && (
+                      <>
+                        {target.points[0].data.streamingPercent.toFixed(1)}%
+                        스밍{' '}
+                        {target.deltaStreamingPercent
+                          ? target.deltaStreamingPercent > 0
+                            ? `(${target.deltaStreamingPercent.toFixed(
+                                1,
+                              )}%p 상승)`
+                            : `(${-target.deltaStreamingPercent.toFixed(
+                                1,
+                              )}%p 하락)`
+                          : null}{' '}
+                      </>
+                    )}
                   </p>
                 ) : (
                   <p>
@@ -548,15 +570,20 @@ function App() {
                       )
                       .toFixed(1)}
                     표 <br />
-                    평균{' '}
-                    {target.points
-                      .reduce(
-                        (acc, curr) =>
-                          acc + curr.data.streamingPercent * curr.percentage,
-                        0,
-                      )
-                      .toFixed(1)}
-                    % 스밍
+                    {props.showStreaming && (
+                      <>
+                        평균{' '}
+                        {target.points
+                          .reduce(
+                            (acc, curr) =>
+                              acc +
+                              curr.data.streamingPercent * curr.percentage,
+                            0,
+                          )
+                          .toFixed(1)}
+                        % 스밍
+                      </>
+                    )}
                   </p>
                 )}
               </div>

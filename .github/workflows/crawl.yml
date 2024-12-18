@@ -2,9 +2,9 @@ name: Crawl
 
 on:
   workflow_dispatch:
-  # schedule:
-  #   # 15min is the shortest interval!
-  #   - cron: '*/15 * * * *'
+  schedule:
+    # 15min is the shortest interval!
+    - cron: '*/15 * * * *'
 
 permissions:
   contents: write
