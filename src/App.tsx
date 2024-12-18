@@ -213,8 +213,30 @@ function App(props: Props) {
       <h1 text-center text-6 md:text-12 font-bold>
         {snapshot.favorite.title}
       </h1>
-      <p text-center text-4 md:text-5 whitespace-pre-line max-w-250 mx-auto>
+      <p
+        text-center
+        text-4
+        md:text-5
+        whitespace-pre-line
+        max-w-250
+        mx-auto
+        text-gray-7
+      >
         {snapshot.favorite.description}
+      </p>
+      <p
+        text-center
+        text-5
+        md:text-6
+        max-w-250
+        mx-auto
+        mt-6
+        text-cyan-7
+        font-bold
+      >
+        진행 기간 <br />
+        {snapshot.favorite.beginAt.toLocaleString('ko-KR')} ~{' '}
+        {snapshot.favorite.endAt.toLocaleString('ko-KR')}
       </p>
       <hr my-5 />
       <p text-center text-4 md:text-5>
