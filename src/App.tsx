@@ -77,16 +77,21 @@ function App(props: Props) {
         ),
       ])
       .range([marginLeft(), width()]);
+
+  // const yDomains = [0, 4, 20, 50] as const;
+  // const yPercentages = [0, 0.6, 0.74, 1];
+  const yDomains = [0, 40] as const;
+  const yPercentages = [0, 1] as const;
   const y = () =>
     d3
       .scaleLinear()
-      .domain([0, 4, 20, 50])
-      .range([
-        height() - marginBottom(),
-        marginTop() + (height() - marginBottom() - marginTop()) * 0.4,
-        marginTop() + (height() - marginBottom() - marginTop()) * 0.36,
-        marginTop(),
-      ]);
+      .domain(yDomains)
+      .range(
+        yPercentages.map(
+          (x) =>
+            (height() - marginBottom() - marginTop()) * (1 - x) + marginTop(),
+        ),
+      );
 
   const lines = () =>
     Object.entries(snapshot.favorite.candidateData)
@@ -115,7 +120,7 @@ function App(props: Props) {
     d3
       .select($yAxis)
       .attr('transform', `translate(${marginLeft()}, ${marginTop()})`)
-      .call(d3.axisLeft(y()).tickValues([0, 4, 20, 50])),
+      .call(d3.axisLeft(y()).tickValues(yDomains)),
   );
 
   const candidatesRank = Object.values(snapshot.favorite.candidates)
