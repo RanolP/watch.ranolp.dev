@@ -14,10 +14,13 @@ const Favorites = {
   HAPPY_NEW_YEAR_2024: {
     id: 2263,
   },
+  FEBRUARY_BIRTHDAY: {
+    id: 2323,
+  },
 };
 
 const favorite = await getFavorite({
-  id: Favorites.HAPPY_NEW_YEAR_2024.id,
+  id: Favorites.FEBRUARY_BIRTHDAY.id,
 });
 const comments = await listComments({
   id: favorite.result.comment_group_id,
