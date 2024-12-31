@@ -19,10 +19,7 @@ export const Comment = z.object({
   connect_artist_id: z.number().int(),
   writer_type: z.enum(['user']),
   reply_cnt: z.number().int(),
-  replies: z.union([
-    z.null(),
-    z.array(z.lazy<z.infer<typeof Comment>>(() => Comment)),
-  ]),
+  replies: z.union([z.null(), z.array(z.unknown())]),
   del_reason: z.literal(0),
   openid_postid: z.null(),
   content_title: z.null(),
