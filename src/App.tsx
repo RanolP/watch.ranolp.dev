@@ -78,10 +78,16 @@ function App(props: Props) {
       ])
       .range([marginLeft(), width()]);
 
+  // 241204 COMEBACK & TREND
   // const yDomains = [0, 4, 20, 50] as const;
   // const yPercentages = [0, 0.6, 0.74, 1];
-  const yDomains = [0, 40] as const;
-  const yPercentages = [0, 1] as const;
+
+  // HAPPY NEW YEAR 2024
+  // const yDomains = [0, 40] as const;
+  // const yPercentages = [0, 1] as const;
+
+  const yDomains = [0, 20, 70, 75] as const;
+  const yPercentages = [0, 0.8, 0.84, 1] as const;
   const y = () =>
     d3
       .scaleLinear()
