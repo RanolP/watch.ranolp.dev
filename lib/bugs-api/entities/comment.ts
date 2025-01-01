@@ -6,7 +6,7 @@ export const Comment = z.object({
   msrl: z.number().int(),
   musicpd_info_id: z.number().int(),
   nickname: z.string(),
-  mem_tp: z.enum(['p', 'e']),
+  mem_tp: z.enum(['p', 'e', 's']),
   userId: z.null(),
   musicpd_nickname: z.null(),
   attach_type: z.null(),
